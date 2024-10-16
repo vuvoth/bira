@@ -58,8 +58,8 @@ async function fund() {
 }
 
 function varSliceSize(someScript: Buffer): number {
-  const length = someScript.length;
-  console.log(varuint)
+	const length = someScript.length;
+	console.log(varuint)
 	return varuint.encodingLength(length) + length;
 }
 
@@ -180,30 +180,30 @@ async function getUTXO(address: string): Promise<{ utxo: any; txid: string; vout
 
 function GetWallet() {
 
-  let dwalletId = process.env.DWALLET_ID;
-  let dwalletCapId = process.env.DWALLET_CAP_ID;
-  let dkgOutputBase64 = process.env.DKG;
-  let dkgOutput = Array.from(fromB64(dkgOutputBase64 as string));
-  
-  return {
-    dwalletId: dwalletId as string,
-    dwalletCapId: dwalletCapId as string,
-    dkgOutput,
-  }
+	let dwalletId = process.env.DWALLET_ID;
+	let dwalletCapId = process.env.DWALLET_CAP_ID;
+	let dkgOutputBase64 = process.env.DKG;
+	let dkgOutput = Array.from(fromB64(dkgOutputBase64 as string));
+
+	return {
+		dwalletId: dwalletId as string,
+		dwalletCapId: dwalletCapId as string,
+		dkgOutput,
+	}
 }
 
 
 async function createMyWallet() {
 
-  const dkg = await createDWallet(keyPair, client);
-  
-  console.log(dkg?.dwalletId, dkg?.dwalletCapId, Buffer.from(dkg?.dkgOutput).toString('base64'));
+	const dkg = await createDWallet(keyPair, client);
+
+	console.log(dkg?.dwalletId, dkg?.dwalletCapId, Buffer.from(dkg?.dkgOutput).toString('base64'));
 }
 
 async function main() {
-  const {dwalletId, dwalletCapId, dkgOutput} = GetWallet()
+	const { dwalletId, dwalletCapId, dkgOutput } = GetWallet()
 	const dwallet = await client.getObject({ id: dwalletId as string, options: { showContent: true } });
-  if (dwallet?.data?.content?.dataType == 'moveObject') {
+	if (dwallet?.data?.content?.dataType == 'moveObject') {
 		// Get the dWallet's public key
 		// @ts-ignore
 		const dWalletPubkey = Buffer.from(dwallet?.data?.content?.fields['public_key']);
