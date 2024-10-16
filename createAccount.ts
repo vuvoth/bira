@@ -1,11 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nochec
-
 import { DWalletClient, SuiHTTPTransport } from '@dwallet-network/dwallet.js/client';
 import { Ed25519Keypair } from '@dwallet-network/dwallet.js/keypairs/ed25519';
 import { approveAndSign, createDWallet, createSignMessages } from "@dwallet-network/dwallet.js/signature-mpc";
 
-import varuint from 'varuint-bitcoin'
+import * as varuint from 'varuint-bitcoin'
 import { requestSuiFromFaucetV0 as requestDwltFromFaucetV0 } from '@dwallet-network/dwallet.js/faucet';
 
 
@@ -16,9 +15,11 @@ import { fromB64 } from '@dwallet-network/dwallet.js/utils';
 import { sha256 } from "@noble/hashes/sha256";
 
 // Importing the bitcoin lib
+
 import * as bitcoin from 'bitcoinjs-lib';
 
 
+// @ts-ignore
 import { BufferWriter } from 'bitcoinjs-lib/src/bufferutils';
 
 import "dotenv/config"
@@ -57,8 +58,8 @@ async function fund() {
 }
 
 function varSliceSize(someScript: Buffer): number {
-	const length = someScript.length;
-
+  const length = someScript.length;
+  console.log(varuint)
 	return varuint.encodingLength(length) + length;
 }
 
@@ -177,17 +178,32 @@ async function getUTXO(address: string): Promise<{ utxo: any; txid: string; vout
 }
 
 
+function GetWallet() {
+
+  let dwalletId = process.env.DWALLET_ID;
+  let dwalletCapId = process.env.DWALLET_CAP_ID;
+  let dkgOutputBase64 = process.env.DKG;
+  let dkgOutput = Array.from(fromB64(dkgOutputBase64 as string));
+  
+  return {
+    dwalletId: dwalletId as string,
+    dwalletCapId: dwalletCapId as string,
+    dkgOutput,
+  }
+}
+
+
 async function createMyWallet() {
- 
+
+  const dkg = await createDWallet(keyPair, client);
+  
+  console.log(dkg?.dwalletId, dkg?.dwalletCapId, Buffer.from(dkg?.dkgOutput).toString('base64'));
 }
 
 async function main() {
-   // const dkg = await createDWallet(keyPair, client);
-  // console.log(dkg?.dwalletId);
-  const dwalletId = "0x302eeecb4e17d84354af38ebfd5764553becc7c9dfa8890fb1ea48c2c3261c30";
-  
+  const {dwalletId, dwalletCapId, dkgOutput} = GetWallet()
 	const dwallet = await client.getObject({ id: dwalletId as string, options: { showContent: true } });
-	if (dwallet?.data?.content?.dataType == 'moveObject') {
+  if (dwallet?.data?.content?.dataType == 'moveObject') {
 		// Get the dWallet's public key
 		// @ts-ignore
 		const dWalletPubkey = Buffer.from(dwallet?.data?.content?.fields['public_key']);
@@ -204,7 +220,7 @@ async function main() {
 		// The recipient address is also a bitcoin testnet address. 
 		// You can generate it in the same way we created the dWallet's 
 		// address by providing it's own key pair.
-		const recipientAddress = 'put the recipient address here';
+		const recipientAddress = 'tb1qq9vszma8lcnj22s8p9j98gyhw93pf4d0tcmm5n';
 		const amount = 500; // Put any number you want to send in satoshis
 
 		// Get the UTXO for the sender address
@@ -250,8 +266,8 @@ async function main() {
 		// We calculate the hash to sign manually because the dWallet Network doesn't support this bitcoin hashing algorithm yet.
 		// This will be fixed in the following issue: https://github.com/dwallet-labs/dwallet-network/issues/161.
 		const hashToSign = sha256(bytesToSign);
-		const signMessagesIdSHA256 = await createSignMessages(dkg?.dwalletId!, dkg?.dkgOutput, [hashToSign], "SHA256", keyPair, client);
-		const sigSHA256 = await approveAndSign(dkg?.dwalletCapId!, signMessagesIdSHA256!, [hashToSign], keyPair, client);
+		const signMessagesIdSHA256 = await createSignMessages(dwalletId, dkgOutput, [hashToSign], "SHA256", keyPair, client);
+		const sigSHA256 = await approveAndSign(dwalletCapId, signMessagesIdSHA256!, [hashToSign], keyPair, client);
 
 		const dWalletSig = Buffer.from(sigSHA256?.signatures[0]!);
 
