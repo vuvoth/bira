@@ -79,8 +79,8 @@ async function main() {
 		// The recipient address is also a bitcoin testnet address. 
 		// You can generate it in the same way we created the dWallet's 
 		// address by providing it's own key pair.
-		const recipientAddress = 'tb1qq9vszma8lcnj22s8p9j98gyhw93pf4d0tcmm5n';
-		const amount = 200; // Put any number you want to send in satoshis
+		const recipientAddress = 'tb1q96dckqd5dgf7094whlr2zs9hyep36jg8a7uquz';
+		const amount = 300; // Put any number you want to send in satoshis
 
 		// Get the UTXO for the sender address
 		const { utxo, txid, vout, satoshis } = await getUTXO(address);
@@ -105,7 +105,7 @@ async function main() {
 		});
 
 		// Calculate change and add change output if necessary
-		const fee = 200 // 1000 satoshis is a simple fee. Choose the value you want to spend
+		const fee = 10 // 1000 satoshis is a simple fee. Choose the value you want to spend
 		const change = satoshis - amount - fee;
 
 		// Sending the rest to the back to the sender
